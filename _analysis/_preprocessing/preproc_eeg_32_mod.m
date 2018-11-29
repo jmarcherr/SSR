@@ -4,21 +4,22 @@ assr_startup
 
     %% ------------Import data ----------------------------------------
     cd(bdfdir)
-    dataset = ['JM2_DG.bdf'];
+    %dataset = ['APG_ASSR_IO_ModDepth_Ear-Right_Lvl-81dB_Mod-0.85.bdf'];
+dataset = 'subj-ando90_exp-deaff_mod_depth_4m_pilot_ear-Right_lvl-81dB_mod-85.bdf'
     ft_defaults
     
     %% ------------Event extraction --------------------------------------
     
-    triggers = [150,120,160];
+    triggers = [192];
     hdr = ft_read_header(dataset);
     cfg=[];
-    cfg.layout =  'biosemi32.lay'; % why not 64?
+    cfg.layout =  'biosemi64.lay'; % why not 64?
     cfg.continuous = 'yes';
     cfg.dataset = dataset;
     cfg.trialdef.eventtype    = 'STATUS';
     cfg.trialdef.eventvalue   = triggers;
     cfg.trialdef.prestim      = 0;
-    cfg.trialdef.poststim     = 3;
+    cfg.trialdef.poststim     = 1;
     cfg = ft_definetrial(cfg);
     
     for tt=1:length(triggers)
@@ -34,8 +35,8 @@ assr_startup
     %cfg = [];
     cfg.dataset = dataset;
     cfg.channel     = 'eeg';%chaoi;
-    cfg.reref       = 'no';
-    %cfg.refchannel  = {'P8'}%setxor(data_int.label(1:64),badchans); % evt re-ref after channel removal
+    cfg.reref       = 'yes';
+    cfg.refchannel  = {'P8'}%setxor(data_int.label(1:64),badchans); % evt re-ref after channel removal
     cfg.layout      =  'biosemi32.lay';
     cfg.continuous  = 'yes';
     cfg.dftfilter   = 'yes';
@@ -43,7 +44,7 @@ assr_startup
     cfg.lpfilttype  = 'but';
     cfg.lpfilter    = 'yes';
     cfg.lpfiltord   = 2;
-    cfg.lpfreq      = 100;
+    cfg.lpfreq      = 300;
     cfg.hpfilter    = 'yes';
     cfg.hpfilttype  = 'but'; 
     cfg.hpfreq      = 0.5;
