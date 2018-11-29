@@ -15,9 +15,13 @@ if ~exist(fileparts(which('ft_defaults.m')))
 end
 
 
-addpath _analysis
-addpath _func
-addpath _data
+addpath(fullfile('_analysis/'))
+addpath _analysis/_preprocessing
+addpath _analysis/_power
+addpath _analysis/_itpc
+addpath _genstim
+addpath _genstim/_func
+addpath /data
 
 
 
