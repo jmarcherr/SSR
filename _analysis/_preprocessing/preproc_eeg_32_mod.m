@@ -3,13 +3,13 @@ ft_defaults
 assr_startup
 
     %% ------------Import data ----------------------------------------
-
-    dataset = ['JF_DGERP.bdf'];
+    cd(bdfdir)
+    dataset = ['JM2_DG.bdf'];
     ft_defaults
     
     %% ------------Event extraction --------------------------------------
-    cd(datadir)
-    triggers = [192]%,100,200,150,120,160];
+    
+    triggers = [150,120,160];
     hdr = ft_read_header(dataset);
     cfg=[];
     cfg.layout =  'biosemi32.lay'; % why not 64?
@@ -29,7 +29,7 @@ assr_startup
     %inital preprocessing(all channels no reref)
     data_int = ft_preprocessing(cfg);
     
-    
+    cd(datadir)
     %Rereferencing (scalp)
     %cfg = [];
     cfg.dataset = dataset;

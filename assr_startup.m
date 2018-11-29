@@ -1,6 +1,7 @@
 % startup
 rootdir = fileparts(which('assr_startup.m'));
 datadir = ([rootdir,'/_data']);
+bdfdir = ([rootdir,'/_data/raw_bdf'])
 
 
 try %#ok
@@ -21,7 +22,7 @@ addpath _analysis/_power
 addpath _analysis/_itpc
 addpath _genstim
 addpath _genstim/_func
-addpath /data
+addpath _data
 
 
 
