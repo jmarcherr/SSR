@@ -13,10 +13,10 @@ M=test_s;
 
 f_fft_mean = squeeze(nanmean(f_fft,1));
 f_fft_pow = abs(f_fft_mean.^2);
-f = linspace(0,fs-(1/fs),length(f_fft_pow)); 
+%f = linspace(0,fs-(1/fs),length(f_fft_pow)); 
+f = fs/2*linspace(0,1,length(M)/2+1);
 
-
-plot(f(1:end/2),f_fft_pow(1:end/2))
+plot(f,f_fft_pow(1:end/2+1))
 
 
 
