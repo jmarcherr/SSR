@@ -5,12 +5,12 @@ assr_startup
     %% ------------Import data ----------------------------------------
     cd(bdfdir)
     %dataset = ['APG_ASSR_IO_ModDepth_Ear-Right_Lvl-81dB_Mod-0.85.bdf'];
-dataset = 'subj-ando90_exp-deaff_mod_depth_4m_pilot_ear-Right_lvl-81dB_mod-85.bdf'
+    dataset = 'pilot3_2xsamtone+oldx10min.bdf'
     ft_defaults
     
     %% ------------Event extraction --------------------------------------
     
-    triggers = [192];
+    triggers = [100,200,255];
     hdr = ft_read_header(dataset);
     cfg=[];
     cfg.layout =  'biosemi64.lay'; % why not 64?
@@ -19,7 +19,7 @@ dataset = 'subj-ando90_exp-deaff_mod_depth_4m_pilot_ear-Right_lvl-81dB_mod-85.bd
     cfg.trialdef.eventtype    = 'STATUS';
     cfg.trialdef.eventvalue   = triggers;
     cfg.trialdef.prestim      = 0;
-    cfg.trialdef.poststim     = 1;
+    cfg.trialdef.poststim     = 3;
     cfg = ft_definetrial(cfg);
     
     for tt=1:length(triggers)
@@ -34,9 +34,9 @@ dataset = 'subj-ando90_exp-deaff_mod_depth_4m_pilot_ear-Right_lvl-81dB_mod-85.bd
     %Rereferencing (scalp)
     %cfg = [];
     cfg.dataset = dataset;
-    cfg.channel     = 'eeg';%chaoi;
+    cfg.channel     = 'all';%chaoi;
     cfg.reref       = 'yes';
-    cfg.refchannel  = {'P8'}%setxor(data_int.label(1:64),badchans); % evt re-ref after channel removal
+    cfg.refchannel  = {'Cz'}%setxor(data_int.label(1:64),badchans); % evt re-ref after channel removal
     cfg.layout      =  'biosemi32.lay';
     cfg.continuous  = 'yes';
     cfg.dftfilter   = 'yes';
