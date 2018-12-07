@@ -3,8 +3,8 @@ function load_bdf__main
 %path_bdf_file = ['/Volumes/EXT_DISK/encina/1_recordings' filesep...
 %    '6_deaff_mod_depth_4m_pilot' filesep 'ando90' filesep 'ando90_raw_data'...
 %    filesep 'subj-ando90_exp-deaff_mod_depth_4m_pilot_ear-Right_lvl-81dB_mod-85.bdf'];
-path_bdf_file   = ['/Users/Gerard/Desktop' filesep 'uheal_tmp' filesep 'JM_DG.bdf'];
-
+%path_bdf_file   = ['/Users/Gerard/Desktop' filesep 'uheal_tmp' filesep 'JM_DG.bdf'];
+path_bdf_file = '/Users/jmarcher/Documents/git/SSR/_data/raw_bdf/pilot3_2xsamtone+oldx10min.bdf';
 epoch_time      = 3;
 
 %% Read data using FieldTrip
@@ -21,7 +21,7 @@ cfg_read.dataset             = path_bdf_file;
 cfg_read.trialdef.prestim    = 0; % 0 s prestimulus window
 cfg_read.trialdef.poststim   = epoch_time; % 1 s poststimulus window
 cfg_read.trialdef.eventtype  = 'STATUS';
-cfg_read.trialdef.eventvalue = 100;
+cfg_read.trialdef.eventvalue = 255;
 
 %% Pre-processing and Re-referencing
 
@@ -160,7 +160,7 @@ bdf_info = rmfield(bdf_info, 'trial');
 
 %% Select one channel or the mean of several channels
 
-chan_idx = strcmp(bdf_info.label, 'P8');
+chan_idx = strcmp(bdf_info.label, 'EXG1');
 %chan_idx = logical(sum([strcmp(bdf_info.label, 'P10'), strcmp(bdf_info.label, 'EXG2')], 2));
 
 

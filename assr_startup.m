@@ -20,9 +20,11 @@ addpath(fullfile('_analysis/'))
 addpath _analysis/_preprocessing
 addpath _analysis/_power
 addpath _analysis/_itpc
+addpath _analysis/uheal_efr_subctx__scripts
 addpath _genstim
 addpath _genstim/_func
 addpath _data
+
 
 
 

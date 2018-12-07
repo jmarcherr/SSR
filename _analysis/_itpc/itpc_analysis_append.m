@@ -2,7 +2,7 @@ clear all
 assr_startup
 ft_defaults
 
-load(['JM2_DG.mat']);
+load(['pilot3_2xsamtone+oldx10min.mat']);
 
 %%
 %     cfgres = [];
@@ -14,7 +14,7 @@ load(['JM2_DG.mat']);
     
 
 %%
-    idx=find(data_all.trialinfo==5)
+    idx=find(data_all.trialinfo==1)
     idx_tmp=idx;
     cfg = [];
     cfg.trials = idx_tmp;
@@ -104,22 +104,24 @@ legend(pow_cond{1}.label)
 %%%%%%%%%%%
 %% Phase coherence (etire spectrum)
 
-%foihz = [1 2 4 6 8 40];
-for ff  = 1 : length(foihz)
-    for k=1:length(trigs)
+foihz = [1 2 4 6 8 40];
+trigs=1;
+%for ff  = 1 : length(foihz)
+    
+    for k=1%:length(trigs)
         %% ITPC
-        idx=find(data.trialinfo==trigs(k))
+        idx=find(data_all.trialinfo==trigs(k))
         idx_tmp=idx;
         cfg = [];
         cfg.method = 'wavelet';
-        cfg.toi    = -3:0.01:5;
-        cfg.foi    = foihz(ff);
+        cfg.toi    = 0:0.01:3;
+        cfg.foi    = 4%foihz(ff);
         cfg.trials       = idx_tmp;
         cfg.output = 'fourier';
-        cfg.channel      = 'eeg';
+        cfg.channel      = 'all';
         cfg.pad = 'maxperlen';
         cfg.width = 12; %<- like dtu /hvidovre paper
-        freq = ft_freqanalysis(cfg, data);
+        freq = ft_freqanalysis(cfg, data_all);
         
         itc = [];
         itc.label     = freq.label;
@@ -141,10 +143,10 @@ for ff  = 1 : length(foihz)
         itc.itlc      = sum(F) ./ (sqrt(N*sum(abs(F).^2)));
         itc.itlc      = abs(itc.itlc);     % take the absolute value, i.e. ignore phase
         itc.itlc      = squeeze(itc.itlc); % remove the first singleton dimension
-        itc_cond{k,ff} = itc;
+        %itc_cond{k,ff} = itc;
         
     end
-end
+%end
 cd(rootdir)
 
 

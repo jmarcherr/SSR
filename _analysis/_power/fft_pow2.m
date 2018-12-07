@@ -14,8 +14,8 @@ data_all = ft_selectdata(cfg,data_all)
 
 %% Select trials based on triggers (see preprocessing)
 close all
-
-for kk=1:3
+%%
+for kk=1:2
 idx=find(data_all.trialinfo==kk)
 idx_tmp=idx%(1:200);
 % how many epochs to group together
@@ -37,9 +37,9 @@ end
 %% perform FFT on epoched data
 f_fft = [];fs = data_all.fsample;
 M = [];
-for mm=1:size(epoched_data,1) % run through epochs
-    M=squeeze(epoched_data(mm,:,:));
-    f_fft(mm,:,:) = fft(M,length(M),2)/(size(M,2)/2); % length of vector
+for kk=1:size(epoched_data,1) % run through epochs
+    M=squeeze(epoched_data(kk,:,:));
+    f_fft(kk,:,:) = fft(M,length(M),2)/(size(M,2)/2); % length of vector
     %f_fft(kk,:,:) = fft(M,2.^nextpow2(length(M)),2); %nextpow2
 end
 f_fft_mean = squeeze(nanmean(f_fft,1));
@@ -49,12 +49,12 @@ f_fft_pow = (f_fft_pow(:,1:end/2+1));
 f = fs/2*linspace(0,1,length(f_fft_mean)/2+1);
 
 %%
-figure(kk)
+figure(kk+1)
 for ii=1:length(data_tmp.label)
 subplot(3,3,ii)
 %plot(f,10*log10(f_fft_pow(find(strcmp(data_tmp.label,'EXG1')),:)));
 plot(f,10*log10(f_fft_pow(find(strcmp(data_tmp.label,data_tmp.label{ii})),:)));
-xlim([1 250])
+xlim([1 5])
 title(data_tmp.label{ii})
 end
 
@@ -87,12 +87,10 @@ subplot(2,1,2)
 plot(pow_4)
 hold on
 set(gca,'xticklabels',data_tmp.label)
-
+hold off
 end
 legend('old','new','new continuous')
 
 
 %%
 
-%[data_weighavg, data_weighavg_mtx, data_weighavg_weights] = ...
-%    art_rej_weighted_avg__uheal(epoched_data, fs, 10);

@@ -35,11 +35,11 @@ trigger = [ones(1,round(1e-3 * fs)) zeros(1,length(y)-round(1e-3 * fs))]';
 
 y=y.*gain_factor;
 %%
-%y = [y y trigger]';
+y = [y y]%trigger]';
 t=0:1/fs:length(y)/fs-1/fs;
-plot(t,y(:,1))
+plot(t,y)
 %%
-y = repmat(y,1,reps);
+y = repmat(y,1,reps)';
 
 %% start psychportaudio
 %init psychportaudio
@@ -53,7 +53,7 @@ devid = 1;
 selectchannel = [1 2;0 0];% 12 ;0 0 0]; %  [4 12;0 0]; ER2 + adat3
 nchans =  size(selectchannel,2);
 pah = PsychPortAudio('Open', devid, [], 1, fs, nchans, [], [], selectchannel,4);
-PsychPortAudio('FillBuffer', pah, y);%y(1:2,:));
+PsychPortAudio('FillBuffer', pah, y');%y(1:2,:));
 PsychPortAudio('Volume',pah,0);PsychPortAudio('Start', pah, 1, 0, 0, .2);PsychPortAudio('Stop', pah, 1);PsychPortAudio('Volume',pah,1);
 
 %% initialize trigger box communication
@@ -103,7 +103,7 @@ DrawFormattedText(w, double(num2str('+')), 'center','center');
 Screen('Flip',w,0,0,1);
 
 
-%% RUN STIMULATION
+ %% RUN STIMULATION
 
 KbName('UnifyKeyNames');
 escKey = KbName('ESCAPE');
