@@ -33,7 +33,7 @@ for fm_freq_oi=[4 207];
                 %% artifact rejection and weighting
                 reject_epoch = 0;
                 reject_idx = 0;
-                filt_coef = [fm_freq_oi-round(fm_freq_oi/7) fm_freq_oi+round(fm_freq_oi/7)];
+                filt_coef = [fm_freq_oi-fm_freq_oi/3 fm_freq_oi+fm_freq_oi/3];
                 filt_def = designfilt('bandpassiir','FilterOrder',2, ...
                     'HalfPowerFrequency1',filt_coef(1),'HalfPowerFrequency2',filt_coef(2), ...
                     'SampleRate',fs,'designmethod','butter');
@@ -144,26 +144,32 @@ for fm_freq_oi=[4 207];
         end
     end
 end
-%%
+%% SNR plot
 close all
 pow = SNR;%cellfun(@minus,Psn,Pn,'Un',0);
 cp = cbrewer('qual','Set1',3);
 sym = {'o','sq','v'};
 %figure(99)
 fid = [4 207];
-for ff=2:2
+for ff=1:2
     figure(ff)
-    for k=1:3
-        for i=1:length(pow)
-            pow_tmp = squeeze(cell2mat(pow(ff,k,:)));
+    for k=1:3  
+        if k==3
+            index = 10;
+        else
+            index = 20;
+        end
+        for i=1:index
             Fdb = db(sqrt(F_crit(ff)-1));
-            
-            p(k)=plot(squeeze(cell2mat(pow(ff,k,:))),['k-',sym{k}],'MarkerFacecolor',cp(k,:),'markersize',14,'linewidth',.5);
-            p(k).Color = [cp(k,:) 0.5];
+            if squeeze(cell2mat(pow(ff,k,i)))>Fdb
+            p(k)=plot(i,squeeze(cell2mat(pow(ff,k,i))),['k-',sym{k}],'MarkerFacecolor',cp(k,:),'markersize',14,'linewidth',.5);
+            else
+            p(k)=plot(i,squeeze(cell2mat(pow(ff,k,i))),['k-',sym{k}],'MarkerFacecolor',[1 1 1],'markersize',14,'linewidth',.5); 
+            end
             hold on
             set(gca,'xtick',0:3:length(pow(ff,k,:)),'xticklabel', (0:e_step*3:length(pow(ff,k,:))*e_step)*3,'fontsize',20);
             if ff>1
-                xlabel('Stim time (s)')
+                %xlabel('Stim time (s)')
             end
             ylabel('SNR (dB)')
             ylim([-10 15])
@@ -175,9 +181,55 @@ for ff=2:2
     title(['fm@ ', num2str(fid(ff)), ' Hz', ', fc@2005']);
     p(k+1)=plot(ones(size(squeeze(cell2mat(pow(ff,2,:)))))*db(sqrt(F_crit(ff)-1)),'-.','color',[0.5 0.5 0.5]);
     
+    
+    set(gcf,'Position',[680 351 514 454]);
+    box off;
+    hleg = legend(p(:),'Burst AM','Double SAM','Continuous double SAM','F_{sig}','location','Best');
+    
+    hleg.Box = 'off'
 end
-set(gcf,'Position',[680 351 514 454]);
-box off;
-hleg = legend(p(:),'Burst AM','Double SAM','Continuous double SAM','F_{sig}','location','Best');
 
-hleg.Box = 'off'
+%% signal + noise plot
+
+%close all
+pow_signal = cellfun(@minus,Psn,Pn,'Un',0);
+pow_noise = Pn;
+pow = pow_noise;
+cp = cbrewer('qual','Set1',3);
+sym = {'o','sq','v'};
+%Fstat test here
+%sqrt(F_crit(ff)-1)
+
+for ff = 1:2
+    figure(ff+2)
+    for k=1:3
+        if k==3
+            index = 10;
+        else
+            index = 20;
+        end
+        for i=1:index
+            % fstat vector goes here
+            Fstat = sqrt(F_crit(ff)-1)< cell2mat(pow_signal(ff,k,i))/cell2mat(pow_noise(ff,k,i));
+            
+            if Fstat
+                plot(i,db(squeeze(cell2mat(pow_signal(ff,k,i)))),['k-',sym{k}],'MarkerFacecolor',cp(k,:),'markersize',14);
+            else
+                plot(i,db(squeeze(cell2mat(pow_signal(ff,k,i)))),['k-',sym{k}],'MarkerFacecolor',[1 1 1],'markersize',14);
+            end
+            hold on
+        end
+        plot(1:index,db(squeeze(cell2mat(pow_noise(ff,k,:)))),'-','color',cp(k,:),'MarkerFacecolor',cp(k,:),'markersize',14);
+        
+    end
+    set(gca,'xtick',0:3:length(pow(ff,k,:)),'xticklabel', (0:e_step*3:length(pow(ff,k,:))*e_step)*3,'fontsize',20);
+    
+    xlabel('Stim time (s)');
+    ylabel('Amplitude (dB)');
+    title(['fm@ ', num2str(fid(ff)), ' Hz', ', fc@2005']);
+    box off;
+    set(gcf,'Position',[680 351 514 454]);
+end
+
+
+

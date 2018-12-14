@@ -13,7 +13,7 @@ gain_factor_75 = gain_factor_calib*10^((75-77.8)/20);
 gain_factor_85 = gain_factor_calib*10^((85-77.8)/20);
 
 fc = [2005]; % carrier
-fmod =[93];% 205]; % fast modulation rate in hz
+fmod =[207];% 205]; % fast modulation rate in hz
 moddepth = [1]; % of fast mod (for SAM)
 stimrate = [2]; % slow stimulus repetition rate in hz
 

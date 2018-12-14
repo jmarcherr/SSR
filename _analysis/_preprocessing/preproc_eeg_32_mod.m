@@ -18,8 +18,8 @@ assr_startup
     cfg.dataset = dataset;
     cfg.trialdef.eventtype    = 'STATUS';
     cfg.trialdef.eventvalue   = triggers;
-    cfg.trialdef.prestim      = 0;
-    cfg.trialdef.poststim     = 3;
+    cfg.trialdef.prestim      = 3;
+    cfg.trialdef.poststim     = 5;
     cfg = ft_definetrial(cfg);
     
     for tt=1:length(triggers)
@@ -36,7 +36,7 @@ assr_startup
     cfg.dataset = dataset;
     cfg.channel     = 'all';%chaoi;
     cfg.reref       = 'yes';
-    cfg.refchannel  = {'Cz'}%setxor(data_int.label(1:64),badchans); % evt re-ref after channel removal
+    cfg.refchannel  = {'EXG1','EXG2'}%setxor(data_int.label(1:64),badchans); % evt re-ref after channel removal
     cfg.layout      =  'biosemi32.lay';
     cfg.continuous  = 'yes';
     cfg.dftfilter   = 'yes';
@@ -63,7 +63,7 @@ assr_startup
     data_DG = ft_resampledata(cfgres, data_DG);
     
     %%  Save mat
-    savefile = [dataset(1:end-4) '.mat']
+    savefile = [dataset(1:end-4) '_itpc.mat']
     save(savefile,'data_DG','-v7.3');    
     
     clear data_DG  

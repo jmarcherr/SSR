@@ -1,6 +1,6 @@
 cfg = struct;
 cfg.fc = fc;
-cfg.fmod = fmod;
+%cfg.fmod = fmod;
 cfg.moddepth = moddepth;
 cfg.stimrate = stimrate;
 fm_ctx = cfg.stimrate*2;
