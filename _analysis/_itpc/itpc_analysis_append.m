@@ -1,20 +1,34 @@
 clear all
-assr_startup
-ft_defaults
+% ITPC analysis
+assr_startup    % add your paths to data and scripts
+ft_defaults     % fieldtrip defaults
 
-load(['pilot3_2xsamtone+oldx10min_itpc.mat']);
+load(['pilot3_2xsamtone+oldx10min_itpc.mat']); % preprocessed data
 data_all= data_DG;
 
 %%%%%%%%%%%
-%% Phase coherence (etire spectrum)
+%% Threshold denoising
 
-foihz = 100:300;%[1:7; 204:210];
+rejectidx = [];
 trigs=[1,2,3];
-for ff  = 1 : size(foihz,1)
-    
+for tt=1:3 % loop over triggers
+    idx = find(data_all.trialinfo==trigs(tt));
+    for ii=1:length(idx)
+        if max(abs(mean(data_all.trial{idx(ii)}(1:2,:))))>120 % 120 mv at frontal channels (Fp1,Fp2)
+            rejectidx = [rejectidx idx(ii)];
+        else
+        end
+    end 
+
+end
+    disp([num2str((length(rejectidx)/length(data_all.trialinfo))*100),'% of trials rejected'])
+%% Phase coherence
+
+foihz =[200:0.1:210]% [0:10];%;[1:0.1:10]
+for ff  = 1 : size(foihz,1)   
     for k=1:length(trigs)
         %% ITPC
-        idx=find(data_all.trialinfo==trigs(k))
+        idx=setdiff(find(data_all.trialinfo==trigs(k)),find(rejectidx==1))
         idx_tmp=idx;
         cfg = [];
         cfg.method = 'wavelet';
@@ -23,8 +37,9 @@ for ff  = 1 : size(foihz,1)
         cfg.trials       = idx_tmp;
         cfg.output = 'fourier';
         cfg.channel      = {'all', '-Status'};
-        cfg.pad = 'maxperlen';
-        %cfg.width = 12; %<- like dtu /hvidovre paper
+        cfg.pad = 'nextpow2'%maxperlen';
+        cfg.width = 500% %; %12<- like dtu /hvidovre paper
+        %cfg.gwidth = 10;
         freq = ft_freqanalysis(cfg, data_all);
         
         itc = [];
@@ -58,6 +73,7 @@ cd(rootdir)
 %Gather all
 itc_all=[];
 itc = [];
+freqs = [];
 for ff=1:1
     for kk=1:3
         itc(kk,ff,:,:,:) = itc_cond{kk,ff}.itpc;
@@ -65,86 +81,66 @@ for ff=1:1
     end
 end
 
-%itc_all = squeeze(itc,3); % average over chan
 close all
 
 figure(2)
-titels = {'ITPC delta','ITPC gamma'}
+
+tit = {'Burst AM','Double SAM','Continuous double SAM'};
 
 ic=0;
-cmp = cbrewer('seq','Blues',11,'cubic');
+cmp = cbrewer('seq','Blues',100,'cubic');
+for ff=1%:2
+for i=1:3
+    ic=ic+1
+    subplot(3,1,i)
+    for chan = 8 %Cz
+    h=imagesc(itc_cond{i}.time,freqs(ff,:),squeeze(itc(i,ff,chan,:,:)),[0.1 0.25]);
+    title(cell2mat(tit(i)));
+    hold on
+    axis xy
+    colormap(cmp)
+    c=colorbar;
+    c.Label.String = 'ITPC';
+    if i==3
+        xlabel('Time (s)');
+    end
+        ylabel('Frequency');
+    end
+    xlim([-1 4])
+    %ylim
+end
+
+end
+
+set(gcf,'Position',[467 382 310 535])
+
+%% 2d plot
+ic=0;
+cmp = cbrewer('seq','Blues',100,'cubic');
+fid = find(freqs==207);
 for ff=1%:2
 for i=1:3
     ic=ic+1
     subplot(3,1,i)
     for chan = 8%1:size(itc,3)
-    h=imagesc(itc_cond{i}.time,freqs(ff,:),squeeze(itc(i,ff,chan,:,:)))
+    h=plot(itc_cond{i}.time,squeeze(itc(i,ff,chan,fid,:)));
+    title(cell2mat(tit(i)));
     hold on
     axis xy
-    pause()
-    end
-    legend(itc_cond{i}.label)
-end
-
-end
-
-%%
-    axis xy
-    set(gca,'YScale','log');
     colormap(cmp)
-    xlabel('time(s)')
-    ylabel('Freq (Hz)')
-    set(gca,'fontsize',16,'ytick',[4,10,40,205])
-    title(titels{i})
-    xlim([-1 3.5])
-    ylim([3 300])
-    c=colorbar('location','EastOutside');
-    %ylabel(c, 'ITPC')
-    set(gca,'fontsize',14)
-    hold on
-    plot(zeros(1,1000),linspace(0,300,1000),'k--')
-    plot(3*ones(1,1000),linspace(0,300,1000),'k--')
-%end
-
-
-%%
-foi = [4 40];
-subplot(3,2,[3,4])
-%%
-p1=semilogx(freqz,squeeze(nanmean(itc_all(:,:),2)),'linewidth',2);
-hold on
-p2=semilogx(freqz,squeeze(nanmean(itc_all(:,:),2)),'linewidth',2);
-set(gca,'fontsize',14,'xtick',[0,4,10,20,30,40,50,60,205])
-%xlabel('Freq(Hz)')
-ylabel('ITPC')
-%ylim([0 0.6])
-%xlim([3 300])
-plot(4*ones(1,1000),linspace(0,10,1000),'k--')
-plot(40*ones(1,1000),linspace(0,10,1000),'k--')
-%hleg=legend([p1 p2],'4Hz delta','40Hz gamma','location','best')
-hleg.Box = 'off'
-grid on
-
-
-set(gcf,'position',[481 112 759 693])
-%%
-% power
-
-subplot(3,2,[5,6])
-
-f = pow_cond{1,1}.freq;
-
-
-for i=1:1
-    plot(f,squeeze(nanmean(pow_cond{1,i}.P,1)),'linewidth',2)
-    hold on
-    xlim([3 300])
-    ylim([0 100])
-    %plot(4*ones(1,1000),linspace(0,10,1000),'k--')
-    %plot(40*ones(1,1000),linspace(0,10,1000),'k--')
-    set(gca,'fontsize',14,'xtick',[0,4,10,20,30,40,50,60,205])
-    xlabel('Freq(Hz)')
-    ylabel('Power (muV)')
-    grid on
+    %c=colorbar;
+    %c.Label.String = 'ITPC';
+    if i==3
+        xlabel('Time (s)');
+    end
+        ylabel('ITPC');
+    end
+    xlim([-1 4])
+    ylim([0 0.4])
 end
-%toc
+
+end
+
+set(gcf,'Position',[467 382 310 535])
+
+
