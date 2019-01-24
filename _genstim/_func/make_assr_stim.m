@@ -1,4 +1,4 @@
-function [stim,cfg] = make_assr_stim(fc,fmod,moddepth,stimrate,fs,Lstim,L,stimtype,gain_factor)
+function [stim,cfg] = make_assr_stim(fc,fmod,fm_ctx,moddepth,stimrate,fs,Lstim,L,stimtype,gain_factor)
 %make_assr_stim: Function to generate steady-state stimulus with slow, and
 %fast modulation rates.
 %   fc          : Carrier frequency (Hz)
@@ -13,6 +13,7 @@ function [stim,cfg] = make_assr_stim(fc,fmod,moddepth,stimrate,fs,Lstim,L,stimty
 cfg = struct;
 cfg.fc = fc;
 cfg.fmod = fmod;
+cfg.fm_ctx = fm_ctx;
 cfg.moddepth = moddepth;
 cfg.stimrate = stimrate;
 cfg.fs = fs;
@@ -40,6 +41,8 @@ if stimtype(1)
         warning('modulation rate too high for the chosen carrier frequency')
     end
     stim = (( 1 + moddepth*sin(2*pi*fmod*t))/2) .* sin(2*pi*fc*t);
+    % make trial
+    stim = stim.*mod; % apply slow on/off modulation
 end
 
 % tones
@@ -53,25 +56,20 @@ if stimtype(2)
         tonemod(ons(ii):ons(ii)+fs/fmod/2-1) = r;
     end
     stim = stim.*tonemod;
+    % make trial
+    stim = stim.*mod; % apply slow on/off modulation
 end
 
 
-% Double sam tone
+% sam_double
 if stimtype(3)
-    stim = zeros(1,Lstim*fs);
-    a = bmchirp(100,10000,fs,0,0);
-    if fmod>fs/length(a)
-        error('chirp too short for modulation rate')
-    end
-    ons = 1:fs/fmod:Lstim*fs+fs/fmod;
-    for ii = 1:length(ons)-1
-        stim(ons(ii):ons(ii)+length(a)-1) = a;
-    end
+stim = ( ( 1 + moddepth*sin(2*pi* fm_ctx*t - pi/2) )/2 )...
+    .* ( ( 1 + moddepth*sin(2*pi* fmod*t- pi/2) )/2 ) .* ...
+    sin(2*pi*fc*t);
 end
 
 
-% make trial
-stim = stim.*mod; % apply slow on/off modulation
+
 stim(end:L*fs) = 0; % silence at the end of the block
 t = 0:1/fs:L-1/fs;
 

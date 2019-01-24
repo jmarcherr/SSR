@@ -61,7 +61,7 @@ stim = stim.*mod; % apply slow on/off modulation
 stim(end:L*fs) = 0; % silence at the end of the block
 t = 0:1/fs:L-1/fs;
 plot(t,stim)
-soundsc(stim,fs)
+%soundsc(stim,fs)
 
 
 %stim = repmat(stim,1,2);

@@ -2,42 +2,66 @@ clear all
 ft_defaults
 assr_startup
 
+cd(bdfdir)
+cd('./tech_aud')
+d = dir('*.bdf');
+load('./info/conditions.mat')
+
     %% ------------Import data ----------------------------------------
+    for dd=11:length(d)
     cd(bdfdir)
-    %dataset = ['APG_ASSR_IO_ModDepth_Ear-Right_Lvl-81dB_Mod-0.85.bdf'];
-    dataset = 'pilot3_2xsamtone+oldx10min.bdf'
-    ft_defaults
+    cd('./tech_aud')
+    dataset = d(dd).name;
+    cond_list = c(dd,:);
+    
     
     %% ------------Event extraction --------------------------------------
     
-    triggers = [100,200,255];
+    triggers = [10,20,30,40,100];
     hdr = ft_read_header(dataset);
     cfg=[];
-    cfg.layout =  'biosemi64.lay'; % why not 64?
+    cfg.layout =  'biosemi64.lay';
     cfg.continuous = 'yes';
+    cfg.channel     = {'Fp1','Fp2','Fz','Cz','T8','T7','FC5','FC6','EXG1','EXG2', 'Status'};
     cfg.dataset = dataset;
     cfg.trialdef.eventtype    = 'STATUS';
     cfg.trialdef.eventvalue   = triggers;
-    cfg.trialdef.prestim      = 3;
-    cfg.trialdef.poststim     = 5;
+    cfg.trialdef.prestim      = 0;
+    cfg.trialdef.poststim     = 3;
     cfg = ft_definetrial(cfg);
     
     for tt=1:length(triggers)
     cfg.trl(cfg.trl(:,4)==triggers(tt),4) = tt; 
     end
 
+    %% Sort conditions
+    %1=low level, low mod
+    %2=low level, high mod
+    %3=high level, low mod
+    %4=high level, high mod
     
+ %Hard coding conditions
+ 
+        for tt=1:4
+            cfg.trl(1+(200*(tt-1)):200*tt,4) = cond_list(tt);
+        end
+
+    
+    unique(cfg.trl(:,4))
+    
+    %%
     %inital preprocessing(all channels no reref)
     data_int = ft_preprocessing(cfg);
     
     cd(datadir)
+    cd('./tech_aud')
     %Rereferencing (scalp)
     %cfg = [];
     cfg.dataset = dataset;
-    cfg.channel     = 'all';%chaoi;
+    cfg.channel     = {'Fp1','Fp2','Fz','Cz','T8','T7','FC5','FC6','EXG1','EXG2', '-Status'};%chaoi;
     cfg.reref       = 'yes';
-    cfg.refchannel  = {'EXG1','EXG2'}%setxor(data_int.label(1:64),badchans); % evt re-ref after channel removal
-    cfg.layout      =  'biosemi32.lay';
+    cfg.refchannel  = {'EXG1','EXG2'};
+    cfg.layout      =  'biosemi64.lay';
     cfg.continuous  = 'yes';
     cfg.dftfilter   = 'yes';
     cfg.dftfreq     = [50, 100, 150, 200];
@@ -63,9 +87,10 @@ assr_startup
     data_DG = ft_resampledata(cfgres, data_DG);
     
     %%  Save mat
-    savefile = [dataset(1:end-4) '_itpc.mat']
+    savefile = [dataset(1:end-4) '.mat']
     save(savefile,'data_DG','-v7.3');    
     
     clear data_DG  
     cd(rootdir)
+    end
 

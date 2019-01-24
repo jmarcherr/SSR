@@ -4,7 +4,7 @@ ft_defaults
 
 %% Select preprocessed .mat file to process
 cd(datadir)
-load(['pilot_17_1_19_SAM_subj_4.mat']);
+load(['pilot_18_1_19_SAM_subj_5_LU.mat']);
 cd(rootdir)
 close all
 ff=0;
@@ -33,7 +33,11 @@ for fm_freq_oi=[4 207];
                 %% artifact rejection and weighting
                 reject_epoch = 0;
                 reject_idx = 0;
-                filt_coef = [fm_freq_oi-fm_freq_oi/3 fm_freq_oi+fm_freq_oi/3];
+                if fm_freq_oi ==4
+                    filt_coef = [fm_freq_oi-fm_freq_oi/1.5 fm_freq_oi+fm_freq_oi/1.5];
+                else
+                   filt_coef = [fm_freq_oi-fm_freq_oi/15 fm_freq_oi+fm_freq_oi/15];
+                end
                 filt_def = designfilt('bandpassiir','FilterOrder',2, ...
                     'HalfPowerFrequency1',filt_coef(1),'HalfPowerFrequency2',filt_coef(2), ...
                     'SampleRate',fs,'designmethod','butter');
@@ -184,9 +188,9 @@ for ff=1:2
     
     set(gcf,'Position',[680 351 514 454]);
     box off;
-    hleg = legend(p(:),'Burst AM','Double SAM','Continuous double SAM','F_{sig}','location','Best');
+    %hleg = legend(p(:),'Burst AM','Double SAM','Continuous double SAM','F_{sig}','location','Best');
     
-    hleg.Box = 'off'
+    %hleg.Box = 'off'
 end
 
 %% signal + noise plot
@@ -195,16 +199,16 @@ end
 pow_signal = cellfun(@minus,Psn,Pn,'Un',0);
 pow_noise = Pn;
 pow = pow_noise;
-cp = cbrewer('qual','Set1',3);
-sym = {'o','sq','v'};
+cp = cbrewer('qual','Set1',4);
+sym = {'o','sq','v','<'};
 %Fstat test here
 %sqrt(F_crit(ff)-1)
 
 for ff = 1:2
     figure(ff+2)
-    for k=1:3
+    for k=1:4
         if k==3
-            index = 10;
+            index = 20;
         else
             index = 20;
         end

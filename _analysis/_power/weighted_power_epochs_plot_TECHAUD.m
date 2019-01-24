@@ -4,15 +4,15 @@ ft_defaults
 
 %% Select preprocessed .mat file to process
 cd(datadir)
-load(['pilot_17_1_19_SAM_subj_4.mat']);
+load(['pilot3_2xsamtone+oldx10min.mat']);
 cd(rootdir)
 close all
 ff=0;
 for fm_freq_oi=[4 207];
     ff=ff+1;
-    for kk=1:4 % trial loop
+    for kk=1:3 % trial loop
         chan_idx = 0;
-        for chan=[find(strcmp(data_DG.label,'Cz'))]% find(strcmp(data_DG.label,'EXG2'))];
+        for chan=[find(strcmp(data_DG.label,'EXG1'))]% find(strcmp(data_DG.label,'EXG2'))];
             %% rename data
             data_all= data_DG;fs = data_all.fsample;
             cfg = [];
@@ -142,20 +142,23 @@ for fm_freq_oi=[4 207];
                 F_crit(ff) = finv(0.99,2,2*length(bg_freq)); % critial value at a<0.01
             end
         end
+            pow_tmp{kk}= f_fft_pow;
     end
+
 end
+
 %% SNR plot
 close all
 pow = SNR;%cellfun(@minus,Psn,Pn,'Un',0);
-cp = cbrewer('qual','Set1',4);
-sym = {'o','sq','v','<'};
+cp = cbrewer('qual','Set1',3);
+sym = {'o','sq','v'};
 %figure(99)
 fid = [4 207];
 for ff=1:2
     figure(ff)
-    for k=1:4  
+    for k=1:3  
         if k==3
-            index = 20;
+            index = 10;
         else
             index = 20;
         end
@@ -184,9 +187,10 @@ for ff=1:2
     
     set(gcf,'Position',[680 351 514 454]);
     box off;
+    
     hleg = legend(p(:),'Burst AM','Double SAM','Continuous double SAM','F_{sig}','location','Best');
     
-    hleg.Box = 'off'
+    %hleg.Box = 'off'
 end
 
 %% signal + noise plot
