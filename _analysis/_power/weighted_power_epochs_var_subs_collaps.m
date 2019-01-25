@@ -283,24 +283,25 @@ end
 legend(b,'4Hz','207Hz')
 
 %% level 4Hz 207Hz corr
+sublabels = {'1','2','3','4','5','6','7','8','9','10','1retest','3retest'};
 figure(2)
 close all
-for i=1:10
+for i=1:12
     if snr_con(i,2,2)<db(sqrt(F_crit{2}))
-        scatter(squeeze(ps_con(i,2,2,:)),squeeze(ps_con(i,2,1,:)),'b')
+        textscatter(squeeze(ps_con(i,2,2,:)),squeeze(ps_con(i,2,1,:)),{sublabels{i}},'fontsize',14)
         hold on
         sig_idx(i)=0;
     else
-        scatter(squeeze(ps_con(i,2,2,:)),squeeze(ps_con(i,2,1,:)),'b','filled')
+        textscatter(squeeze(ps_con(i,2,2,:)),squeeze(ps_con(i,2,1,:)),{sublabels{i}},'fontsize',14)
         hold on
         sig_idx(i) = 1
     end
 end
 
-close all
+
 %pl=scatter(squeeze(snr_con(:,2,2,:)),squeeze(snr_con(:,2,1,:)),'b')
 %lsline
-plot(squeeze(ps_con(find(sig_idx),2,2,:)),squeeze(ps_con(find(sig_idx),2,1,:)),'o')
+plot(squeeze(ps_con(find(sig_idx),2,2,:)),squeeze(ps_con(find(sig_idx),2,1,:)),'.')
 [r,p]=corr(squeeze(ps_con(find(sig_idx),2,2,:)),squeeze(ps_con(find(sig_idx),2,1,:)))
 text(0.8e-4,0.1,['r= ',num2str(r),' p= ',num2str(p)])
 %hold on

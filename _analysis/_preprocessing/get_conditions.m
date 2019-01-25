@@ -34,10 +34,10 @@ for cc=1:length(cond)
 end
 
 
-%1=low level, low mod
-%2=low level, high mod
-%3=high level, low mod
-%4=high level, high mod
+%1=low mod, low level
+%2=low mod, high level
+%3=high mod, low level
+%4=high mod, high level
 
 
 

@@ -2,63 +2,41 @@ clear all
 ft_defaults
 assr_startup
 
-
 cd(bdfdir)
-cd('./tech_aud')
+cd('./tech_aud/speech')
 d = dir('*.bdf');
-load('./info/conditions.mat')
-
+%load('./info/conditions.mat')
 %% ------------Import data ----------------------------------------
+
+
 for dd=1:length(d)
     cd(bdfdir)
-    cd('./tech_aud')
+    cd('./tech_aud/speech')
     dataset = d(dd).name;
-    cond_list = c(dd,:);
-    
-    
     %% ------------Event extraction --------------------------------------
     
-    triggers = [10,20,30,40,100];
+    triggers = [100];
     hdr = ft_read_header(dataset);
     cfg=[];
     cfg.layout =  'biosemi64.lay';
     cfg.continuous = 'yes';
-    cfg.channel     = {'Fp1','Fp2','Fz','Cz','T8','T7','FC5','FC6','EXG1','EXG2', 'Status'};
     cfg.dataset = dataset;
     cfg.trialdef.eventtype    = 'STATUS';
     cfg.trialdef.eventvalue   = triggers;
     cfg.trialdef.prestim      = 0;
-    cfg.trialdef.poststim     = 3;
+    cfg.trialdef.poststim     = 60;
     cfg = ft_definetrial(cfg);
     
     for tt=1:length(triggers)
         cfg.trl(cfg.trl(:,4)==triggers(tt),4) = tt;
     end
     
-    %% Sort conditions
-    %1=low level, low mod
-    %2=low level, high mod
-    %3=high level, low mod
-    %4=high level, high mod
     
-    %Hard coding conditions
-    
-    for tt=1:4
-        cfg.trl(1+(200*(tt-1)):200*tt,4) = cond_list(tt);
-    end
-    
-    
-    unique(cfg.trl(:,4))
-    
-    %%
     %inital preprocessing(all channels no reref)
     data_int = ft_preprocessing(cfg);
     
-
-    
-    
     cd(datadir)
-    cd('./tech_aud')
+    cd('./tech_aud/speech')
     %Rereferencing (scalp)
     %cfg = [];
     cfg.dataset = dataset;
@@ -82,12 +60,6 @@ for dd=1:length(d)
     % rereferenced data struct
     data_DG = ft_preprocessing(cfg,data_int);
     
-    cfg          = [];
-    cfg.method   = 'channel';
-    cfg.channel = 'all'
-    cfg.viewmode = 'butterfly';
-    ft_databrowser(cfg,data_DG)
-    pause
     clear data_int
     
     % Resample to 1024Hz

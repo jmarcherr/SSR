@@ -14,7 +14,7 @@ if length(trial_id)>1
 else
     idx=find(data_in.trialinfo==trial_id)
 end
-idx_tmp=idx(nr_epochs);
+idx_tmp=idx(1:nr_epochs);
 
 % generate epochs
 epoched_data = [];
