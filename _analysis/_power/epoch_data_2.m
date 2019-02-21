@@ -10,11 +10,15 @@ else
     disp('Epoching data');
 end
 if length(trial_id)>1
-    idx = find(data_in.trialinfo==trial_id(1) | data_in.trialinfo==trial_id(2))
+    idx = find(data_in.trialinfo==trial_id(1) | data_in.trialinfo==trial_id(2));
 else
-    idx=find(data_in.trialinfo==trial_id)
+    idx=find(data_in.trialinfo==trial_id);
 end
-idx_tmp=idx(1:nr_epochs);
+if length(nr_epochs)==1
+    idx_tmp=idx(1:nr_epochs);
+else
+    idx_tmp=nr_epochs;
+end
 
 % generate epochs
 epoched_data = [];

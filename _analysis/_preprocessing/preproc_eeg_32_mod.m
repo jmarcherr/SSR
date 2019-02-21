@@ -9,7 +9,7 @@ d = dir('*.bdf');
 load('./info/conditions.mat')
 
 %% ------------Import data ----------------------------------------
-for dd=1:length(d)
+for dd=2:length(d)
     cd(bdfdir)
     cd('./tech_aud')
     dataset = d(dd).name;
@@ -27,8 +27,8 @@ for dd=1:length(d)
     cfg.dataset = dataset;
     cfg.trialdef.eventtype    = 'STATUS';
     cfg.trialdef.eventvalue   = triggers;
-    cfg.trialdef.prestim      = 0;
-    cfg.trialdef.poststim     = 3;
+    cfg.trialdef.prestim      = 3;
+    cfg.trialdef.poststim     = 5;
     cfg = ft_definetrial(cfg);
     
     for tt=1:length(triggers)
@@ -82,12 +82,12 @@ for dd=1:length(d)
     % rereferenced data struct
     data_DG = ft_preprocessing(cfg,data_int);
     
-    cfg          = [];
-    cfg.method   = 'channel';
-    cfg.channel = 'all'
-    cfg.viewmode = 'butterfly';
-    ft_databrowser(cfg,data_DG)
-    pause
+%     cfg          = [];
+%     cfg.method   = 'channel';
+%     cfg.channel = 'all'
+%     cfg.viewmode = 'butterfly';
+%     ft_databrowser(cfg,data_DG)
+%     pause
     clear data_int
     
     % Resample to 1024Hz
@@ -97,7 +97,7 @@ for dd=1:length(d)
     data_DG = ft_resampledata(cfgres, data_DG);
     
     %%  Save mat
-    savefile = [dataset(1:end-4) '.mat']
+    savefile = [dataset(1:end-4) '_itpc.mat']
     save(savefile,'data_DG','-v7.3');
     
     clear data_DG

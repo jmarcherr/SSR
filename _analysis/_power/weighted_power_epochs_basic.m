@@ -55,7 +55,7 @@ for ss=1:length(d)
             reject_idx = 0;
             
             if fm_freq_oi ==4
-                filt_coef = [fm_freq_oi-3 fm_freq_oi+3]; %4 Hz
+                filt_coef = [fm_freq_oi-2 fm_freq_oi+2]; %4 Hz
             else
                 filt_coef = [fm_freq_oi-fm_freq_oi/15 fm_freq_oi+fm_freq_oi/15]; % 207 Hz
             end
@@ -69,7 +69,7 @@ for ss=1:length(d)
                 data_tmp = epoched_data(ii,:);
                 data_art = epoched_blink(ii,:);
                 reject_idx = reject_idx+1;
-                if max(abs(data_art)) > 80 % thresholding 80mV
+                if max(abs(data_art)) > 60 % thresholding 80mV
                     reject_epoch = reject_epoch +1;
                     reject_idx = reject_idx-1;
                     %close all
@@ -106,9 +106,9 @@ for ss=1:length(d)
             
             %number of epochs per trial
             if fm_freq_oi < 207
-                epochs_x_trial = 3;
+                epochs_x_trial = 5;
             else
-                epochs_x_trial = 3;
+                epochs_x_trial = 5;
             end
             %number of epochs
             idx_tmp = size(epoch_weighted,1);
@@ -214,7 +214,7 @@ end
 
 %%
 close all
-colorcodes = {'k','g','b','r'};
+colorcodes = cbrewer('qual','Paired',4)%{'k','g','b','r'};
 pow_sig = cellfun(@minus,Psn,Pn,'Un',0);
 for ii=1:length(d) %number of subs
     figure(1)
@@ -223,9 +223,9 @@ for ii=1:length(d) %number of subs
         for cc=1:4 %condition
             sort = [1,3,2,4];
             if SNR{ii,f,sort(cc)}<db(sqrt(F_crit{ff}-1))
-            p(cc)=plot(cc,SNR{ii,f,sort(cc)},[colorcodes{cc}, '-o'])
+                plot(cc,SNR{ii,f,sort(cc)}, '-o','color',colorcodes(cc,:))
             else
-            p(cc)=plot(cc,SNR{ii,f,sort(cc)},[colorcodes{cc}, '-o'],'markerfacecolor',colorcodes{cc})
+                p(cc)=plot(cc,SNR{ii,f,sort(cc)}, '-o','color',colorcodes(cc,:),'markerfacecolor',colorcodes(cc,:))
             end
             hold on
             %plot(ii,Pn{f,cc,ii},[colorcodes{cc},'x'])
@@ -233,81 +233,65 @@ for ii=1:length(d) %number of subs
         
         
         plot(1:4,cell2mat(squeeze(SNR(ii,f,sort(:)))),'-','color',[0 0 0 0.1])
-        plot(1:4,ones(1,4)*db(sqrt(F_crit{ff}-1)),'--k')
+        sig = plot(1:4,ones(1,4)*db(sqrt(F_crit{ff}-1)),'--k')
         
-        legend([p(1),p(2)],'40dB', '75dB')
+        
+        box off
         xlim([0.5 4+.5])
         ylim([-15 20])
-        set(gca,'xtick',1:length(d)+1)
+        set(gca,'xtick',0)
         xlabel('Condition')
-        ylabel('SNR dB')
+        %ylabel('SNR dB')
         
         title([num2str(fms(f)), ' Hz'])
+        set(gca,'Fontsize',16)
     end
     
 end
+hleg = legend([p(1),p(2),p(3),p(4),sig],'25%,40dB', '85%,40dB','25%,75dB','85%,75dB','F_{sig}','location','southeast')
+hleg.Box = 'off'
 
 
 
-%%
-for ss=1:length(d)
-    for cc=1:2
-        for ff=1:2
-            ps_con(ss,cc,ff,:) = squeeze(cell2mat(Ps(ss,ff,cc)));
-            snr_con(ss,cc,ff,:) = squeeze(cell2mat(SNR(ss,ff,cc)));
-            pn_con(ss,cc,ff,:) = squeeze(cell2mat(Pn(ss,ff,cc)));
-        end
-    end
-end
-close all
-b=bar(1:2,squeeze(mean(snr_con(:,1:2,:,:),1)))
-hold on
 
-
-set(gca,'xtick',1:2,'xticklabel',{'40dB','75dB'})
-legend(b(1),'4Hz','207Hz')
-ylabel('SNR dB')
-xlabel('Condition')
-
-for cc=1:2
-    scatter(ones(1,length(d))*cc-0.1,squeeze(snr_con(:,cc,1,:)),'b')
-    scatter(ones(1,length(d))*cc+0.1,squeeze(snr_con(:,cc,2,:)),'r')
-end
-
-
-for ii= 1:length(d)
-    a=1:2;
-    plot(a-0.1,squeeze(snr_con(ii,:,1,:)),'b-')
-    plot(a+0.1,squeeze(snr_con(ii,:,2,:)),'r-')
-end
-
-legend(b,'4Hz','207Hz')
 
 %% level 4Hz 207Hz corr
 sublabels = {'1','2','3','4','5','6','7','8','9','10','1retest','3retest'};
 figure(2)
-close all
-for i=1:12
-    if snr_con(i,2,2)<db(sqrt(F_crit{2}))
-        textscatter(squeeze(ps_con(i,2,2,:)),squeeze(ps_con(i,2,1,:)),{sublabels{i}},'fontsize',14)
-        hold on
-        sig_idx(i)=0;
+%207 difference
+%Conditions
+%1 = low mod, low level
+%2 = low mod, high level
+%3 = high mod, low level
+%4 = high mod, high level
+snr_con = cell2mat(SNR)
+p_diff = cell2mat(cellfun(@minus,Ps(:,2,4),Ps(:,2,3),'Un',0)); %207 Hz difference at 75dB
+p_4Hz = cell2mat(Ps(:,1,2));
+sig_idx = [];
+for i=1:length(sublabels)
+    if snr_con(i,2,2)<db(sqrt(F_crit{2}-1)) | snr_con(i,2,4)<db(sqrt(F_crit{2}-1)) | snr_con(i,1,2)<db(sqrt(F_crit{2}-1))| snr_con(i,1,4)<db(sqrt(F_crit{2}-1))
+        sig_idx(i) = 0;
     else
-        textscatter(squeeze(ps_con(i,2,2,:)),squeeze(ps_con(i,2,1,:)),{sublabels{i}},'fontsize',14)
-        hold on
-        sig_idx(i) = 1
+        sig_idx(i) = 1;
+        %textscatter(p_diff(i),p_4Hz(i),{sublabels{i}},'fontsize',14)
+
     end
+    hold on
 end
 
+sig_idx([11,12]) = 0;
+scatter(p_diff(find(sig_idx)),p_4Hz(find(sig_idx)),'.w')
+[r,p]=corr(squeeze(p_diff(find(sig_idx))),squeeze(log10(p_4Hz(find(sig_idx)))))
 
-%pl=scatter(squeeze(snr_con(:,2,2,:)),squeeze(snr_con(:,2,1,:)),'b')
-%lsline
-plot(squeeze(ps_con(find(sig_idx),2,2,:)),squeeze(ps_con(find(sig_idx),2,1,:)),'.')
-[r,p]=corr(squeeze(ps_con(find(sig_idx),2,2,:)),squeeze(ps_con(find(sig_idx),2,1,:)))
-text(0.8e-4,0.1,['r= ',num2str(r),' p= ',num2str(p)])
-%hold on
-%scatter(squeeze(snr_con(:,2,1,:)),squeeze(snr_con(:,2,2,:)),'r')
+hold on
+textscatter(p_diff(find(sig_idx)),p_4Hz(find(sig_idx)),{sublabels{find(sig_idx)}},'fontsize',14)
 lsline
+title(['r= ',num2str(r),' p= ',num2str(p)])
+xlabel('207Hz(85%-25%) amplitude ')
+ylabel('4Hz amplitude')
+
+%plot(p_diff([7,11,12]),p_4Hz([7,11,12]),'o')
+%%
 
 
 

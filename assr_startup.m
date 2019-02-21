@@ -24,6 +24,9 @@ addpath _analysis/uheal_efr_subctx__scripts
 addpath _genstim
 addpath _genstim/_func
 addpath _data
+addpath _data/pilot
+addpath _data/raw_bdf
+addpath _data/tech_aud
 
 
 
